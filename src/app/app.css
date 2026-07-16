@@ -26,24 +26,17 @@
 .sub { margin: 0 auto; max-width: 34rem; color: var(--muted); line-height: 1.6; font-size: 0.92rem; }
 .period { margin: 0.75rem 0 0; display: inline-block; padding: 0.25rem 0.75rem; border: 1px solid var(--line); border-radius: 999px; color: var(--gold); font-size: 0.8rem; }
 
-/* Tabs */
-.tabs { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
-.tabs button { background: var(--panel); border: 1px solid var(--line); color: var(--muted); padding: 0.55rem 1.3rem; border-radius: 999px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.18s ease; }
-.tabs button:hover { color: var(--text); border-color: #3a4150; }
-.tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
 /* Panel */
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1.5rem; }
 .hint { margin: 0 0 1.1rem; color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
 .hint strong { color: var(--gold); }
-.hint code, .doc code { background: var(--panel-2); border: 1px solid var(--line); padding: 0.05rem 0.35rem; border-radius: 5px; color: var(--gold); font-size: 0.85em; }
+.hint code { background: var(--panel-2); border: 1px solid var(--line); padding: 0.05rem 0.35rem; border-radius: 5px; color: var(--gold); font-size: 0.85em; }
 
 .controls { margin-bottom: 0.9rem; }
 .search { width: 100%; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem 0.9rem; color: var(--text); font-size: 0.95rem; }
 .search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
 .count { margin: 0.25rem 0 0.75rem; color: var(--muted); font-size: 0.82rem; }
-.empty { color: var(--muted); text-align: center; padding: 1.5rem 0; }
 
 /* Examples */
 .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 1.1rem; font-size: 0.82rem; color: var(--muted); }
@@ -92,31 +85,6 @@
 .answer { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.9rem; border-radius: 10px; border: 1px dashed var(--line); color: var(--muted); }
 .a-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
 .a-desc { font-size: 0.85rem; line-height: 1.5; }
-
-/* Card filter chips */
-.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
-.chip { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.82rem; cursor: pointer; transition: all 0.15s ease; }
-.chip:hover { color: var(--text); }
-.chip.on { background: var(--accent-soft); border-color: var(--accent); color: #ff8a97; }
-
-/* Level 1: full-text results */
-.doc { display: flex; flex-direction: column; gap: 0.6rem; }
-.result { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 0.5rem 1rem 0.9rem; }
-.result-source { margin: 0.6rem 0 0.3rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.rs-card { color: var(--accent); font-size: 0.72rem; font-weight: 700; border: 1px solid var(--accent); border-radius: 5px; padding: 0.05rem 0.4rem; }
-.rs-head { color: var(--muted); font-size: 0.74rem; }
-.md { font-size: 0.9rem; line-height: 1.75; color: var(--text); overflow-x: auto; }
-.md :where(h1, h2, h3, h4) { font-size: 1rem; margin: 0.6rem 0 0.3rem; }
-.md p { margin: 0.4rem 0; }
-.md ul, .md ol { margin: 0.4rem 0; padding-left: 1.3rem; }
-.md li { margin: 0.2rem 0; }
-.md blockquote { margin: 0.5rem 0; padding: 0.3rem 0.9rem; color: var(--muted); border-left: 3px solid var(--line); background: rgba(255, 255, 255, 0.02); }
-.md a { color: #7ec4ff; }
-.md table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: 0.82rem; }
-.md th, .md td { border: 1px solid var(--line); padding: 0.35rem 0.5rem; text-align: left; }
-.md th { background: var(--panel); }
-.md pre { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.6rem 0.8rem; overflow-x: auto; }
-.md mark { background: var(--gold); color: #1a1204; padding: 0 0.1rem; border-radius: 3px; }
 
 /* Footer */
 .foot { margin-top: 1.75rem; text-align: center; color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
