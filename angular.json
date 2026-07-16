@@ -19,6 +19,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*.md",
+                "input": "src/cardInfo",
+                "output": "cardInfo"
               }
             ],
             "styles": [
