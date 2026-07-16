@@ -1,0 +1,42 @@
+name: Build and Deploy Angular
+
+on:
+  push:
+    branches:
+      - main # 或是 master，請確認你的主分支名稱
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 修正 1：使用正確的 setup-node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 修正 2：Base-href 必須對應 GitHub Repo 名稱 (cardex)
+      - name: Build Angular
+        run: npx ng build --configuration production --base-href /cardex/
+
+      # 修正 3：複製 404.html (來源路徑要用 Angular 專案名稱 cardex)
+      - name: Copy index.html to 404.html
+        run: cp dist/cardex/browser/index.html dist/cardex/browser/404.html
+
+      # 修正 4：部署 (來源資料夾要用 Angular 專案名稱 cardex)
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist/cardex/browser
+          branch: gh-pages
