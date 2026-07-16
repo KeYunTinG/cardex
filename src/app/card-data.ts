@@ -7,7 +7,7 @@
 //   - 台新Richart卡.md
 //   - 玉山_Pi拍錢包卡.md
 //   - 玉山_UBear卡.md
-// 供層級一（全文搜尋）與層級二（跨卡商家／通路查詢）使用。
+// 供跨卡商家／通路查詢使用。
 
 export interface Card {
   id: string;
@@ -19,7 +19,7 @@ export interface Card {
   rewardType: string;
   /** 一般消費基本回饋 */
   general: { label: string; rate: string }[];
-  /** 對應的 MD 檔名（層級一載入用） */
+  /** 資料來源的 MD 檔名（僅標示出處，不在執行期載入） */
   file: string;
 }
 

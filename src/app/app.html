@@ -2,195 +2,106 @@
   <header class="hero">
     <p class="eyebrow">CARDEX · 信用卡回饋查詢</p>
     <h1>刷哪張卡最划算？</h1>
-    <p class="sub">
-      跨卡商家查詢＋辦法全文搜尋。純前端、資料取自各卡權益手冊 MD。
-    </p>
     <p class="period">收錄 {{ cards.length }} 張卡 · 活動期間 2026 下半年</p>
   </header>
 
-  <nav class="tabs" role="tablist">
-    <button
-      role="tab"
-      [class.active]="tab() === 'lookup'"
-      (click)="setTab('lookup')"
-    >
-      跨卡商家查詢
-    </button>
-    <button
-      role="tab"
-      [class.active]="tab() === 'search'"
-      (click)="setTab('search')"
-    >
-      辦法全文搜尋
-    </button>
-  </nav>
+  <!-- ===================== 跨卡商家／通路查詢 ===================== -->
+  <section class="panel">
+    <p class="hint">
+      輸入商家或通路，查出<strong>哪張卡有回饋、屬哪個活動、回饋幾 %</strong>；
+      輸入<strong>國碼或國名</strong>（如 <code>JPN</code>、<code>歐洲</code>）則查星展加碼國家。
+    </p>
 
-  <!-- ===================== 層級二：跨卡商家／通路查詢 ===================== -->
-  @if (tab() === 'lookup') {
-    <section class="panel">
-      <p class="hint">
-        輸入商家或通路，查出<strong>哪張卡有回饋、屬哪個活動、回饋幾 %</strong>；
-        輸入<strong>國碼或國名</strong>（如 <code>JPN</code>、<code>歐洲</code>）則查星展加碼國家。
-      </p>
+    <div class="controls">
+      <input class="search" type="search" placeholder="例如 麥當勞、UNIQLO、蝦皮、唐吉訶德、JPN…" [ngModel]="lookupQuery()"
+        (ngModelChange)="lookupQuery.set($event)" />
+    </div>
 
-      <div class="controls">
-        <input
-          class="search"
-          type="search"
-          placeholder="例如 麥當勞、UNIQLO、蝦皮、唐吉訶德、JPN…"
-          [ngModel]="lookupQuery()"
-          (ngModelChange)="lookupQuery.set($event)"
-        />
-      </div>
-
-      <div class="examples">
-        <span>試試：</span>
-        @for (ex of ['麥當勞', '唐吉訶德', '淘寶', 'UNIQLO', 'JPN', '歐洲']; track ex) {
-          <button class="ex" (click)="pickExample(ex)">{{ ex }}</button>
-        }
-      </div>
-
-      @if (!hasQuery()) {
-        <!-- 未輸入：卡片一覽 -->
-        <div class="cards-list">
-          @for (c of cards; track c.id) {
-            <div class="card-summary">
-              <div class="cs-head">
-                <span class="cs-name">{{ c.name }}</span>
-                <span class="cs-net">{{ c.network }}</span>
-              </div>
-              <p class="cs-tag">{{ c.tagline }}</p>
-              <div class="cs-general">
-                @for (g of c.general; track g.label) {
-                  <span class="cs-rate">{{ g.label }} <b>{{ g.rate }}</b></span>
-                }
-              </div>
-              <p class="cs-meta">{{ c.issuer }} · 回饋形式：{{ c.rewardType }}</p>
-            </div>
-          }
-        </div>
-      } @else if (noMatch()) {
-        <div class="answer none">
-          <span class="a-name">查無「{{ lookupQuery() }}」</span>
-          <span class="a-desc">
-            {{ cards.length }} 張卡的加碼通路清單與星展加碼國碼皆未收錄，可能僅適用各卡一般消費回饋。
-          </span>
-        </div>
-      } @else {
-        @if (countryTotal() > 0) {
-          <div class="countries">
-            <p class="count">
-              「{{ lookupQuery() }}」列入星展存戶升級加碼國家：{{ countryTotal() }} 個
-            </p>
-            <ul class="country-list">
-              @for (c of matchedCountries(); track c.code) {
-                <li class="country">
-                  <span class="c-code">{{ c.code }}</span>
-                  <span class="c-name">{{ c.name }}</span>
-                  <span class="c-region">{{ c.region }}</span>
-                  <span class="c-rate">{{ c.rate }}</span>
-                </li>
-              }
-            </ul>
-            <p class="country-note">{{ countryNote }}</p>
-          </div>
-        }
-
-        @if (matchTotal() > 0) {
-          <p class="count">
-            「{{ lookupQuery() }}」在 {{ cardsHit() }} 張卡命中 {{ matchTotal() }} 項優惠
-          </p>
-        }
-        <div class="groups">
-          @for (g of groupedOffers(); track g.card.id) {
-            <div class="group">
-              <div class="group-head">
-                <span class="g-name">{{ g.card.name }}</span>
-                <span class="g-net">{{ g.card.network }}</span>
-              </div>
-              <ul class="offers">
-                @for (o of g.offers; track o.merchant + o.category) {
-                  <li class="offer">
-                    <div class="offer-top">
-                      <span class="o-merchant">{{ o.merchant }}</span>
-                      <span class="o-rate">{{ o.rate }}</span>
-                    </div>
-                    <span class="o-cat">{{ o.category }}</span>
-                    <div class="o-meta">
-                      @if (o.cap) { <span class="o-cap">上限 {{ o.cap }}</span> }
-                      @if (o.note) { <span class="o-note">{{ o.note }}</span> }
-                    </div>
-                  </li>
-                }
-              </ul>
-            </div>
-          }
-        </div>
+    <div class="examples">
+      <span>試試：</span>
+      @for (ex of ['麥當勞', '唐吉訶德', '淘寶', 'UNIQLO', 'JPN', '歐洲']; track ex) {
+      <button class="ex" (click)="pickExample(ex)">{{ ex }}</button>
       }
-    </section>
-  }
+    </div>
 
-  <!-- ===================== 層級一：全文關鍵字搜尋 ===================== -->
-  @if (tab() === 'search') {
-    <section class="panel">
-      <p class="hint">
-        跨 {{ cards.length }} 張卡的權益條文全文搜尋（例如 <code>年費</code>、<code>eTag</code>、
-        <code>歐洲</code>、<code>LINE Pay</code>），撈出相關段落並高亮。
-      </p>
-
-      <div class="controls">
-        <input
-          class="search"
-          type="search"
-          placeholder="搜尋條文關鍵字…"
-          [ngModel]="docQuery()"
-          (ngModelChange)="docQuery.set($event)"
-        />
-      </div>
-
-      <div class="chips">
-        <button
-          class="chip"
-          [class.on]="cardFilter() === 'all'"
-          (click)="cardFilter.set('all')"
-        >
-          全部卡片
-        </button>
-        @for (c of cards; track c.id) {
-          <button
-            class="chip"
-            [class.on]="cardFilter() === c.id"
-            (click)="cardFilter.set(c.id)"
-          >
-            {{ c.name }}
-          </button>
-        }
-      </div>
-
-      @if (mdError()) {
-        <p class="empty">條文載入失敗，請確認 src/cardInfo 下的 MD 檔是否存在。</p>
-      } @else if (!mdReady()) {
-        <p class="empty">條文載入中…</p>
-      } @else if (resultCount() === 0) {
-        <p class="empty">找不到含有「{{ docQuery() }}」的條文段落。</p>
-      } @else {
-        @if (docQuery().trim()) {
-          <p class="count">符合的段落：{{ resultCount() }} 段</p>
-        }
-        <div class="doc">
-          @for (r of results(); track $index) {
-            <article class="result">
-              <p class="result-source">
-                <span class="rs-card">{{ r.cardName }}</span>
-                @if (r.heading) { <span class="rs-head">{{ r.heading }}</span> }
-              </p>
-              <div class="md" [innerHTML]="r.html"></div>
-            </article>
+    @if (!hasQuery()) {
+    <!-- 未輸入：卡片一覽 -->
+    <div class="cards-list">
+      @for (c of cards; track c.id) {
+      <div class="card-summary">
+        <div class="cs-head">
+          <span class="cs-name">{{ c.name }}</span>
+          <span class="cs-net">{{ c.network }}</span>
+        </div>
+        <p class="cs-tag">{{ c.tagline }}</p>
+        <div class="cs-general">
+          @for (g of c.general; track g.label) {
+          <span class="cs-rate">{{ g.label }} <b>{{ g.rate }}</b></span>
           }
         </div>
+        <p class="cs-meta">{{ c.issuer }} · 回饋形式：{{ c.rewardType }}</p>
+      </div>
       }
-    </section>
-  }
+    </div>
+    } @else if (noMatch()) {
+    <div class="answer none">
+      <span class="a-name">查無「{{ lookupQuery() }}」</span>
+      <span class="a-desc">
+        {{ cards.length }} 張卡的加碼通路清單與星展加碼國碼皆未收錄，可能僅適用各卡一般消費回饋。
+      </span>
+    </div>
+    } @else {
+    @if (countryTotal() > 0) {
+    <div class="countries">
+      <p class="count">
+        「{{ lookupQuery() }}」列入星展存戶升級加碼國家：{{ countryTotal() }} 個
+      </p>
+      <ul class="country-list">
+        @for (c of matchedCountries(); track c.code) {
+        <li class="country">
+          <span class="c-code">{{ c.code }}</span>
+          <span class="c-name">{{ c.name }}</span>
+          <span class="c-region">{{ c.region }}</span>
+          <span class="c-rate">{{ c.rate }}</span>
+        </li>
+        }
+      </ul>
+      <p class="country-note">{{ countryNote }}</p>
+    </div>
+    }
+
+    @if (matchTotal() > 0) {
+    <p class="count">
+      「{{ lookupQuery() }}」在 {{ cardsHit() }} 張卡命中 {{ matchTotal() }} 項優惠
+    </p>
+    }
+    <div class="groups">
+      @for (g of groupedOffers(); track g.card.id) {
+      <div class="group">
+        <div class="group-head">
+          <span class="g-name">{{ g.card.name }}</span>
+          <span class="g-net">{{ g.card.network }}</span>
+        </div>
+        <ul class="offers">
+          @for (o of g.offers; track o.merchant + o.category) {
+          <li class="offer">
+            <div class="offer-top">
+              <span class="o-merchant">{{ o.merchant }}</span>
+              <span class="o-rate">{{ o.rate }}</span>
+            </div>
+            <span class="o-cat">{{ o.category }}</span>
+            <div class="o-meta">
+              @if (o.cap) { <span class="o-cap">上限 {{ o.cap }}</span> }
+              @if (o.note) { <span class="o-note">{{ o.note }}</span> }
+            </div>
+          </li>
+          }
+        </ul>
+      </div>
+      }
+    </div>
+    }
+  </section>
 
   <footer class="foot">
     資料來源：各卡權益手冊／官網頁面整理 · 本工具僅供查詢參考，實際回饋以各發卡銀行公告為準。
