@@ -1,5 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { QaChat } from './qa/qa-chat';
 import {
   CARDS,
   Card,
@@ -24,12 +25,15 @@ interface CountryHit extends Country {
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule],
+  imports: [FormsModule, QaChat],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
 export class App {
   protected readonly cards = CARDS;
+
+  /** 頁面模式：快速查詢或問答機器人（兩者共用同一份資料） */
+  protected readonly mode = signal<'search' | 'chat'>('search');
 
   // ================= 跨卡商家／通路查詢 =================
   protected readonly lookupQuery = signal('');
@@ -82,5 +86,11 @@ export class App {
 
   protected pickExample(term: string) {
     this.lookupQuery.set(term);
+  }
+
+  /** 從問答機器人跳回快速查詢並帶入關鍵字 */
+  protected openSearch(term: string) {
+    this.lookupQuery.set(term);
+    this.mode.set('search');
   }
 }

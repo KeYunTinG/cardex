@@ -7,6 +7,17 @@
 
   <!-- ===================== 跨卡商家／通路查詢 ===================== -->
   <section class="panel">
+    <div class="tabs" role="tablist" aria-label="查詢模式">
+      <button class="tab" role="tab" type="button" [class.on]="mode() === 'search'"
+        [attr.aria-selected]="mode() === 'search'" (click)="mode.set('search')">🔍 快速查詢</button>
+      <button class="tab" role="tab" type="button" [class.on]="mode() === 'chat'"
+        [attr.aria-selected]="mode() === 'chat'" (click)="mode.set('chat')">💬 問答機器人</button>
+    </div>
+
+    <!-- 問答機器人：用 hidden 而非 @if，切換分頁時保留對話 -->
+    <app-qa-chat [hidden]="mode() !== 'chat'" (searchRequested)="openSearch($event)" />
+
+    <div [hidden]="mode() !== 'search'">
     <p class="hint">
       輸入商家或通路，查出<strong>哪張卡有回饋、屬哪個活動、回饋幾 %</strong>；
       輸入<strong>國碼或國名</strong>（如 <code>JPN</code>、<code>歐洲</code>）則查星展加碼國家。
@@ -101,6 +112,7 @@
       }
     </div>
     }
+    </div>
   </section>
 
   <footer class="foot">

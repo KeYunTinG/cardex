@@ -28,6 +28,12 @@
 
 /* Panel */
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1.5rem; }
+
+/* Mode tabs（快速查詢／問答機器人） */
+.tabs { display: flex; gap: 0.4rem; margin-bottom: 1.1rem; border-bottom: 1px solid var(--line); }
+.tab { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); padding: 0.5rem 0.9rem; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+.tab:hover { color: var(--text); }
+.tab.on { color: var(--text); border-bottom-color: var(--accent); }
 .hint { margin: 0 0 1.1rem; color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
 .hint strong { color: var(--gold); }
 .hint code { background: var(--panel-2); border: 1px solid var(--line); padding: 0.05rem 0.35rem; border-radius: 5px; color: var(--gold); font-size: 0.85em; }

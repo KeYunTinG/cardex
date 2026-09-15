@@ -1,0 +1,131 @@
+<div class="chat">
+  <div class="chat-head">
+    <div>
+      <span class="chat-title">💬 問答機器人</span>
+      <span class="chat-sub">規則式 · 純前端 · 不連網</span>
+    </div>
+    <button class="chat-reset" type="button" (click)="reset()">清除對話</button>
+  </div>
+
+  <div class="log" #log aria-live="polite">
+    @for (m of messages(); track m.id; let last = $last) {
+      @if (m.role === 'user') {
+        <div class="msg user"><div class="bubble">{{ m.text }}</div></div>
+      } @else {
+        <div class="msg bot">
+          <div class="bubble">
+            @for (b of m.blocks ?? []; track $index) {
+              @if (b.kind === 'text') {
+                <p class="t" [class.crown]="b.tone === 'crown'" [class.muted]="b.tone === 'muted'">{{ b.text }}</p>
+              } @else if (b.kind === 'offers') {
+                <div class="groups">
+                  @for (g of b.groups; track g.card.id; let gi = $index) {
+                    <div class="group" [class.top]="b.crown && gi === 0 && g.best !== null">
+                      <div class="g-head">
+                        @if (b.crown && gi === 0 && g.best !== null) { <span class="g-crown">👑</span> }
+                        <span class="g-name">{{ g.card.name }}</span>
+                        <span class="g-best">{{ g.offers[0].rate }}</span>
+                      </div>
+                      <ul class="offers">
+                        @for (o of visible(g); track o.merchant + o.category) {
+                          <li class="offer">
+                            <div class="o-top">
+                              <span class="o-merchant">{{ o.merchant }}</span>
+                              <span class="o-rate">{{ o.rate }}</span>
+                            </div>
+                            <span class="o-cat">{{ o.category }}</span>
+                            @if (o.cap || o.note) {
+                              <div class="o-meta">
+                                @if (o.cap) { <span class="o-cap">上限 {{ o.cap }}</span> }
+                                @if (o.note) { <span class="o-note">{{ o.note }}</span> }
+                              </div>
+                            }
+                          </li>
+                        }
+                      </ul>
+                      @if (folded(g) > 0) {
+                        <button class="more" type="button" (click)="toggle(m, b, gi)">還有 {{ folded(g) }} 項，展開</button>
+                      } @else if (g.expanded) {
+                        <button class="more" type="button" (click)="toggle(m, b, gi)">收合</button>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (b.query) {
+                  <button class="link" type="button" (click)="searchRequested.emit(b.query)">🔍 到快速查詢看「{{ b.query }}」</button>
+                }
+              } @else if (b.kind === 'categories') {
+                <ul class="cats">
+                  @for (c of b.items; track c.card.id + c.category) {
+                    <li class="cat">
+                      <div class="cat-top">
+                        <span class="cat-card">{{ short[c.card.id] }}</span>
+                        <span class="cat-name">{{ c.category }}</span>
+                        <span class="cat-rate">{{ c.rate }}</span>
+                      </div>
+                      <div class="cat-merchants">
+                        {{ c.merchants.slice(0, 12).join('、') }}
+                        @if (c.merchants.length > 12) { <span class="cat-more">…等 {{ c.merchants.length }} 家</span> }
+                      </div>
+                      @if (c.cap || c.note) {
+                        <div class="o-meta">
+                          @if (c.cap) { <span class="o-cap">上限 {{ c.cap }}</span> }
+                          @if (c.note) { <span class="o-note">{{ c.note }}</span> }
+                        </div>
+                      }
+                    </li>
+                  }
+                </ul>
+              } @else if (b.kind === 'generals') {
+                <ul class="gens">
+                  @for (x of b.items; track $index; let first = $first) {
+                    <li class="gen" [class.top]="b.crown && first && x.value !== null">
+                      <span class="gen-card">{{ short[x.card.id] }}</span>
+                      <span class="gen-label">{{ x.label }}</span>
+                      <span class="gen-rate">{{ x.rate }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else if (b.kind === 'countries') {
+                <div class="countries">
+                  <div class="cc-list">
+                    @for (c of b.items; track c.code) {
+                      <span class="cc"><b>{{ c.code }}</b> {{ c.name }}</span>
+                    }
+                  </div>
+                  @for (r of b.rates; track r) { <p class="cc-rate">{{ r }}</p> }
+                  <p class="cc-note">{{ b.note }}</p>
+                </div>
+              } @else if (b.kind === 'cards') {
+                <ul class="cardlist">
+                  @for (c of b.items; track c.id) {
+                    <li class="cardrow">
+                      <span class="cr-name">{{ c.name }}</span>
+                      <span class="cr-tag">{{ c.tagline }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          </div>
+          @if (last && !thinking() && (m.suggestions?.length ?? 0) > 0) {
+            <div class="chips">
+              @for (s of m.suggestions ?? []; track s) {
+                <button class="chip" type="button" (click)="send(s)">{{ s }}</button>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+    @if (thinking()) {
+      <div class="msg bot"><div class="bubble typing"><span></span><span></span><span></span></div></div>
+    }
+  </div>
+
+  <form class="composer" (submit)="$event.preventDefault(); send()">
+    <input class="ask" type="text" name="q" autocomplete="off" placeholder="問我：麥當勞刷哪張卡？去日本帶哪張？"
+      [ngModel]="draft()" (ngModelChange)="draft.set($event)" />
+    <button class="send" type="submit" [disabled]="!draft().trim() || thinking()">送出</button>
+  </form>
+</div>
