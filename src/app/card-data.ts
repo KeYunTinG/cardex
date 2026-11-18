@@ -104,7 +104,7 @@ export const CARDS: Card[] = [
     issuer: '台新銀行',
     network: 'Mastercard／Visa／JCB',
     tagline: '7＋1 大刷每日切換／Chill 刷最高 10%',
-    period: '2026/7/1–2027/3/31',
+    period: '2026/7/1–2027/12/31',
     rewardType: '台新 Point',
     general: [
       { label: '一般消費（免切換）', rate: '0.3%' },
@@ -229,7 +229,7 @@ const CTBC_SCAN = '須以 Pi 拍錢包或 Hami Pay 掃碼交易';
 // ---------- 台新 Richart 卡 ----------
 const RICHART_CAP = '每期加碼消費以永久信用額度 ＋ NT$30 萬為限';
 const RICHART_NOTE = '需切換至本方案；限實體卡或指定 Pay（LINE Pay／全盈+Pay 不適用）';
-const CHILL_NOTE = '上市期 2026/7/8–9/30；可用實體卡、台新 Pay、Apple／Google／Samsung Pay、LINE Pay';
+const CHILL_NOTE = '上市期 2026/7/8–12/31；可用實體卡、台新 Pay、Apple／Google／Samsung Pay、LINE Pay';
 
 // ---------- 玉山 U Bear 卡 ----------
 const UBEAR_5_CAP = '每歸戶上限 1,200 元';
@@ -517,14 +517,14 @@ export const OFFERS: Offer[] = [
     'Bar Home',
     'Phowa',
     'MOONROCK',
+    ['台灣代駕', ['代駕']],
+    ['Motodomo 愛車管家', ['Motodomo', '愛車管家']],
   ]),
   ...group('richart', 'Chill 刷·日常續命', '10%', RICHART_CAP, CHILL_NOTE, [
     ['50 嵐', ['50嵐']],
     '得正',
-    '八曜和茶',
     '五桐號',
     '龜記',
-    '茶之魔手',
     'UG TEA',
     '叮哥茶飲',
     'CAFE!N',
@@ -554,9 +554,10 @@ export const OFFERS: Offer[] = [
     ['Disney+', ['迪士尼']],
     '愛爾達',
   ]),
+  ...group('richart', 'Chill 刷·數位外掛', '5%', RICHART_CAP, CHILL_NOTE, ['Pinkoi']),
   ...group('richart', 'Chill 刷·數位外掛', '3.3%', RICHART_CAP, CHILL_NOTE, [
     ['Apple 直營（含官網）', ['Apple', 'App Store']],
-    'Studio A',
+    ['Studio A', ['Straight A']],
     'DJI',
     'Insta360',
     'GoPro',
