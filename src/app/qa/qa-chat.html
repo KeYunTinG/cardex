@@ -1,7 +1,7 @@
 <div class="chat">
   <div class="chat-head">
     <div>
-      <span class="chat-title">💬 問答機器人</span>
+      <span class="chat-title">問問看</span>
       <span class="chat-sub">規則式 · 純前端 · 不連網</span>
     </div>
     <button class="chat-reset" type="button" (click)="reset()">清除對話</button>
@@ -22,7 +22,7 @@
                   @for (g of b.groups; track g.card.id; let gi = $index) {
                     <div class="group" [class.top]="b.crown && gi === 0 && g.best !== null">
                       <div class="g-head">
-                        @if (b.crown && gi === 0 && g.best !== null) { <span class="g-crown">👑</span> }
+                        @if (b.crown && gi === 0 && g.best !== null) { <span class="g-crown">最划算</span> }
                         <span class="g-name">{{ g.card.name }}</span>
                         <span class="g-best">{{ g.offers[0].rate }}</span>
                       </div>
@@ -36,7 +36,7 @@
                             <span class="o-cat">{{ o.category }}</span>
                             @if (o.cap || o.note) {
                               <div class="o-meta">
-                                @if (o.cap) { <span class="o-cap">上限 {{ o.cap }}</span> }
+                                @if (o.cap) { <span class="o-cap">{{ capLabel(o.cap) }}</span> }
                                 @if (o.note) { <span class="o-note">{{ o.note }}</span> }
                               </div>
                             }
@@ -52,7 +52,7 @@
                   }
                 </div>
                 @if (b.query) {
-                  <button class="link" type="button" (click)="searchRequested.emit(b.query)">🔍 到快速查詢看「{{ b.query }}」</button>
+                  <button class="link" type="button" (click)="searchRequested.emit(b.query)">到查詢頁看「{{ b.query }}」的完整條件 →</button>
                 }
               } @else if (b.kind === 'categories') {
                 <ul class="cats">
@@ -69,7 +69,7 @@
                       </div>
                       @if (c.cap || c.note) {
                         <div class="o-meta">
-                          @if (c.cap) { <span class="o-cap">上限 {{ c.cap }}</span> }
+                          @if (c.cap) { <span class="o-cap">{{ capLabel(c.cap) }}</span> }
                           @if (c.note) { <span class="o-note">{{ c.note }}</span> }
                         </div>
                       }

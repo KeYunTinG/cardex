@@ -1,121 +1,306 @@
 <div class="page">
-  <header class="hero">
-    <p class="eyebrow">CARDEX · 信用卡回饋查詢</p>
-    <h1>刷哪張卡最划算？</h1>
-    <p class="period">收錄 {{ cards.length }} 張卡 · 活動期間 2026 下半年</p>
+  <header class="topbar">
+    <div class="wrap topbar-in">
+      <button class="brand" type="button" (click)="lookupQuery.set(''); mode.set('search')" aria-label="Cardex 回首頁">
+        <span class="logo" aria-hidden="true"><span></span></span>
+        <span class="brand-name">Cardex</span>
+      </button>
+      <span class="meta">{{ cards.length }} 張卡 · 2026 下半年活動</span>
+
+      <!-- 手機版這組會固定在畫面底部 -->
+      <nav class="modes" role="tablist" aria-label="查詢模式">
+        <button class="mode" role="tab" type="button" [class.on]="mode() === 'search'"
+          [attr.aria-selected]="mode() === 'search'" (click)="mode.set('search')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+          查詢
+        </button>
+        <button class="mode" role="tab" type="button" [class.on]="mode() === 'chat'"
+          [attr.aria-selected]="mode() === 'chat'" (click)="mode.set('chat')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" /></svg>
+          問問看
+        </button>
+      </nav>
+    </div>
   </header>
 
-  <!-- ===================== 跨卡商家／通路查詢 ===================== -->
-  <section class="panel">
-    <div class="tabs" role="tablist" aria-label="查詢模式">
-      <button class="tab" role="tab" type="button" [class.on]="mode() === 'search'"
-        [attr.aria-selected]="mode() === 'search'" (click)="mode.set('search')">🔍 快速查詢</button>
-      <button class="tab" role="tab" type="button" [class.on]="mode() === 'chat'"
-        [attr.aria-selected]="mode() === 'chat'" (click)="mode.set('chat')">💬 問答機器人</button>
-    </div>
-
-    <!-- 問答機器人：用 hidden 而非 @if，切換分頁時保留對話 -->
+  <main class="wrap main">
+    <!-- 問答機器人：用 hidden 而非 @if，切換模式時保留對話 -->
     <app-qa-chat [hidden]="mode() !== 'chat'" (searchRequested)="openSearch($event)" />
 
-    <div [hidden]="mode() !== 'search'">
-    <p class="hint">
-      輸入商家或通路，查出<strong>哪張卡有回饋、屬哪個活動、回饋幾 %</strong>；
-      輸入<strong>國碼或國名</strong>（如 <code>JPN</code>、<code>歐洲</code>）則查星展加碼國家。
-    </p>
+    <div class="search-mode" [hidden]="mode() !== 'search'">
+      <section class="hero" [class.compact]="hasQuery()">
+        <h1>這筆，刷哪張？</h1>
+        <p class="lede">打店名、通路或國碼直接比回饋；打一句話，就幫你問機器人。</p>
 
-    <div class="controls">
-      <input class="search" type="search" placeholder="例如 麥當勞、UNIQLO、蝦皮、唐吉訶德、JPN…" [ngModel]="lookupQuery()"
-        (ngModelChange)="lookupQuery.set($event)" />
-    </div>
+        <form class="omni" (submit)="$event.preventDefault(); submit()">
+          <label class="sr-only" for="q">搜尋商家、通路、國碼，或問一句話</label>
+          <svg class="omni-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+          <input id="q" class="search" type="search" name="q" autocomplete="off"
+            placeholder="麥當勞、蝦皮、JPN，或「去日本帶哪張？」"
+            [ngModel]="lookupQuery()" (ngModelChange)="lookupQuery.set($event)" />
+          <button class="omni-go" type="submit">比一比</button>
+        </form>
 
-    <div class="examples">
-      <span>試試：</span>
-      @for (ex of ['麥當勞', '唐吉訶德', '淘寶', 'UNIQLO', 'JPN', '歐洲']; track ex) {
-      <button class="ex" (click)="pickExample(ex)">{{ ex }}</button>
-      }
-    </div>
-
-    @if (!hasQuery()) {
-    <!-- 未輸入：卡片一覽 -->
-    <div class="cards-list">
-      @for (c of cards; track c.id) {
-      <div class="card-summary">
-        <div class="cs-head">
-          <span class="cs-name">{{ c.name }}</span>
-          <span class="cs-net">{{ c.network }}</span>
-        </div>
-        <p class="cs-tag">{{ c.tagline }}</p>
-        <div class="cs-general">
-          @for (g of c.general; track g.label) {
-          <span class="cs-rate">{{ g.label }} <b>{{ g.rate }}</b></span>
+        @if (!hasQuery()) {
+        <div class="examples">
+          <span>常查：</span>
+          @for (ex of examples; track ex) {
+          <button class="ex" type="button" (click)="pickExample(ex)">{{ ex }}</button>
           }
         </div>
-        <p class="cs-meta">{{ c.issuer }} · 回饋形式：{{ c.rewardType }}</p>
-      </div>
-      }
-    </div>
-    } @else if (noMatch()) {
-    <div class="answer none">
-      <span class="a-name">查無「{{ lookupQuery() }}」</span>
-      <span class="a-desc">
-        {{ cards.length }} 張卡的加碼通路清單與星展加碼國碼皆未收錄，可能僅適用各卡一般消費回饋。
-      </span>
-    </div>
-    } @else {
-    @if (countryTotal() > 0) {
-    <div class="countries">
-      <p class="count">
-        「{{ lookupQuery() }}」列入星展存戶升級加碼國家：{{ countryTotal() }} 個
-      </p>
-      <ul class="country-list">
-        @for (c of matchedCountries(); track c.code) {
-        <li class="country">
-          <span class="c-code">{{ c.code }}</span>
-          <span class="c-name">{{ c.name }}</span>
-          <span class="c-region">{{ c.region }}</span>
-          <span class="c-rate">{{ c.rate }}</span>
-        </li>
         }
-      </ul>
-      <p class="country-note">{{ countryNote }}</p>
-    </div>
-    }
+      </section>
 
-    @if (matchTotal() > 0) {
-    <p class="count">
-      「{{ lookupQuery() }}」在 {{ cardsHit() }} 張卡命中 {{ matchTotal() }} 項優惠
-    </p>
-    }
-    <div class="groups">
-      @for (g of groupedOffers(); track g.card.id) {
-      <div class="group">
-        <div class="group-head">
-          <span class="g-name">{{ g.card.name }}</span>
-          <span class="g-net">{{ g.card.network }}</span>
+      @if (!hasQuery()) {
+      <!-- ===================== 首頁：情境捷徑＋我的卡夾 ===================== -->
+      <section class="block">
+        <div class="block-head">
+          <h2>情境捷徑</h2>
+          <span>點一下直接看排名</span>
         </div>
-        <ul class="offers">
-          @for (o of g.offers; track o.merchant + o.category) {
-          <li class="offer">
-            <div class="offer-top">
-              <span class="o-merchant">{{ o.merchant }}</span>
-              <span class="o-rate">{{ o.rate }}</span>
-            </div>
-            <span class="o-cat">{{ o.category }}</span>
-            <div class="o-meta">
-              @if (o.cap) { <span class="o-cap">上限 {{ o.cap }}</span> }
-              @if (o.note) { <span class="o-note">{{ o.note }}</span> }
-            </div>
-          </li>
+        <div class="scenes">
+          @for (s of scenes(); track s.query) {
+          <button class="scene" type="button" (click)="pickExample(s.query)">
+            <span class="scene-title">{{ s.title }}</span>
+            @if (s.top) {
+            <span class="scene-rate">{{ s.top.best.rate }}</span>
+            <span class="scene-card">{{ s.top.card.name }} · {{ s.top.best.category }}</span>
+            } @else {
+            <span class="scene-card">你的卡夾沒有這個情境的加碼</span>
+            }
+          </button>
           }
-        </ul>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <h2>我的卡夾</h2>
+          <span>勾掉沒辦的卡，開「只看我的卡」排名就只算你手上的</span>
+        </div>
+        <div class="wallet">
+          @for (c of cards; track c.id) {
+          <label class="wcard" [class.off]="!owned().has(c.id)">
+            <span class="swatch" [style.background]="color[c.id]" aria-hidden="true"><span></span></span>
+            <span class="wcard-body">
+              <span class="wcard-top">
+                <span class="wcard-name">{{ c.name }}</span>
+                <input type="checkbox" [checked]="owned().has(c.id)" (change)="toggleOwned(c.id)"
+                  [attr.aria-label]="c.name + ' 列入我的卡夾'" />
+              </span>
+              <span class="wcard-tag">{{ c.tagline }}</span>
+              <span class="wcard-meta">{{ c.issuer }} · {{ c.network }} · {{ c.rewardType }}</span>
+            </span>
+          </label>
+          }
+        </div>
+      </section>
+      } @else {
+      <!-- ===================== 查詢結果 ===================== -->
+      <div class="filters">
+        <p class="count">
+          「{{ lookupQuery().trim() }}」
+          @if (eligible().length + excluded().length > 0) {
+          · {{ eligible().length + excluded().length }} 張卡有加碼、共 {{ matchTotal() }} 項 · 依回饋率排序
+          }
+        </p>
+        <div class="seg" role="group" aria-label="比較範圍">
+          <button type="button" [class.on]="!onlyMine()" [attr.aria-pressed]="!onlyMine()" (click)="onlyMine.set(false)">
+            全部 {{ cards.length }} 張
+          </button>
+          <button type="button" [class.on]="onlyMine()" [attr.aria-pressed]="onlyMine()" (click)="onlyMine.set(true)">
+            只看我的卡（{{ ownedCount() }}）
+          </button>
+        </div>
+      </div>
+
+      @if (noMatch()) {
+      <div class="none">
+        @if (onlyMine() && ownedCount() === 0) {
+        <p class="none-title">你的卡夾是空的</p>
+        <p class="none-desc">回首頁勾選手上的卡，或切回「全部 {{ cards.length }} 張」。</p>
+        } @else {
+        <p class="none-title">查無「{{ lookupQuery().trim() }}」的加碼</p>
+        <p class="none-desc">
+          {{ onlyMine() ? '你卡夾裡的卡' : cards.length + ' 張卡' }}的加碼通路與星展加碼國碼都沒有收錄，可能只適用一般消費回饋。
+          如果你打的是一句話，機器人比較聽得懂。
+        </p>
+        <button class="ask-bot" type="button" (click)="askBot(lookupQuery().trim())">問機器人「{{ lookupQuery().trim() }}」</button>
+        }
+      </div>
+      } @else {
+      <div class="results">
+        <div class="res-main">
+          @if (countryTotal() > 0) {
+          <section class="countries" aria-label="加碼國家">
+            <h2 class="sec-title">「{{ lookupQuery().trim() }}」列入星展存戶升級加碼國家：{{ countryTotal() }} 個</h2>
+            <ul class="country-list">
+              @for (c of matchedCountries(); track c.code) {
+              <li class="country">
+                <span class="c-code">{{ c.code }}</span>
+                <span class="c-name">{{ c.name }}</span>
+                <span class="c-region">{{ c.region }}</span>
+                <span class="c-rate">{{ c.rate }}</span>
+              </li>
+              }
+            </ul>
+            <p class="country-note">{{ countryNote }}</p>
+          </section>
+          }
+
+          @if (top(); as t) {
+          <section class="verdict" aria-label="最划算">
+            <div class="v-top">
+              <div class="v-who">
+                <span class="v-label">最划算</span>
+                <span class="v-card">
+                  <span class="swatch lg" [style.background]="color[t.card.id]" aria-hidden="true"><span></span></span>
+                  <span class="v-name">{{ t.card.name }}</span>
+                </span>
+                <span class="v-cat">{{ t.best.merchant }} · {{ t.best.category }}</span>
+              </div>
+              <span class="v-rate">{{ t.best.rate }}</span>
+            </div>
+            <div class="v-chips">
+              @if (t.best.note) {
+              <span class="chip warn">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9.5 17h-19z" /><path d="M12 10v4M12 17.5v.01" /></svg>
+                {{ t.best.note }}
+              </span>
+              }
+              @if (t.best.cap) { <span class="chip">{{ capLabel(t.best.cap) }}</span> }
+            </div>
+            @if (t.offers.length > 1) {
+            <ng-container *ngTemplateOutlet="moreOffers; context: { $implicit: t, dark: true }" />
+            }
+          </section>
+          }
+
+          @if (runners().length > 0) {
+          <ol class="ranks" aria-label="其他有加碼的卡">
+            @for (r of runners(); track r.card.id; let i = $index) {
+            <li class="rank">
+              <span class="r-no">{{ i + 2 }}</span>
+              <span class="swatch" [style.background]="color[r.card.id]" aria-hidden="true"><span></span></span>
+              <div class="r-body">
+                <span class="r-name">{{ r.card.name }}</span>
+                <span class="r-cat">{{ r.best.merchant }} · {{ r.best.category }}</span>
+                <span class="bar" aria-hidden="true"><span [style.width.%]="r.bar"></span></span>
+                @if (r.best.note || r.best.cap) {
+                <div class="r-chips">
+                  @if (r.best.note) {
+                  <span class="chip warn">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9.5 17h-19z" /><path d="M12 10v4M12 17.5v.01" /></svg>
+                    {{ r.best.note }}
+                  </span>
+                  }
+                  @if (r.best.cap) { <span class="chip">{{ capLabel(r.best.cap) }}</span> }
+                </div>
+                }
+                @if (r.offers.length > 1) {
+                <ng-container *ngTemplateOutlet="moreOffers; context: { $implicit: r, dark: false }" />
+                }
+              </div>
+              <span class="r-rate">{{ r.best.rate }}</span>
+            </li>
+            }
+          </ol>
+          }
+
+          @if (excluded().length > 0) {
+          <section class="excluded" aria-label="條件不符的卡">
+            <h2 class="sec-title">條件不符，暫不列入排名</h2>
+            @for (r of excluded(); track r.card.id) {
+            <div class="ex-row">
+              <span class="ex-name">{{ r.card.name }}</span>
+              <span class="ex-rate">{{ r.best.rate }}</span>
+              <button type="button" class="linkish" (click)="toggleMet(r.card.id)">我符合，放回排名</button>
+            </div>
+            }
+          </section>
+          }
+
+          @if (others().length > 0 && (eligible().length + excluded().length) > 0) {
+          <details class="others">
+            <summary>
+              <span>其他 {{ others().length }} 張沒有「{{ lookupQuery().trim() }}」加碼，以一般消費計</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </summary>
+            <ul class="gen-list">
+              @for (c of others(); track c.id) {
+              <li>
+                <span class="gen-name">{{ c.name }}</span>
+                <span class="gen-rates">
+                  @for (g of c.general; track g.label) {
+                  <span>{{ g.label }} <b>{{ g.rate }}</b></span>
+                  }
+                </span>
+              </li>
+              }
+            </ul>
+          </details>
+          }
+
+          <div class="follow">
+            <h2 class="sec-title">想問更細？</h2>
+            <div class="follow-btns">
+              <button type="button" (click)="askBot(lookupQuery().trim() + ' 刷哪張卡')">問機器人「{{ lookupQuery().trim() }}」刷哪張</button>
+              <button type="button" (click)="askBot('國外消費哪張最高')">國外消費哪張最高</button>
+            </div>
+          </div>
+        </div>
+
+        @if (checks().length > 0 || aliasHits().length > 0) {
+        <aside class="res-side">
+          @if (checks().length > 0) {
+          <section class="side-card">
+            <h2 class="sec-title">刷之前確認</h2>
+            @for (r of checks(); track r.card.id) {
+            <label class="check">
+              <input type="checkbox" [checked]="!unmet().has(r.card.id)" (change)="toggleMet(r.card.id)" />
+              <span><b>{{ r.card.name }}</b>：{{ r.best.note }}</span>
+            </label>
+            }
+            <p class="side-note">取消勾選＝這個條件你做不到，該卡會移出排名。</p>
+          </section>
+          }
+          @if (aliasHits().length > 0) {
+          <section class="side-card plain">
+            <h2 class="sec-title">對到的帳單名稱</h2>
+            <ul class="aliases">
+              @for (a of aliasHits(); track a) { <li><code>{{ a }}</code></li> }
+            </ul>
+          </section>
+          }
+        </aside>
+        }
       </div>
       }
+      }
     </div>
-    }
-    </div>
-  </section>
+  </main>
 
-  <footer class="foot">
+  <footer class="wrap foot">
     資料來源：各卡權益手冊／官網頁面整理 · 本工具僅供查詢參考，實際回饋以各發卡銀行公告為準。
   </footer>
 </div>
+
+<!-- 同一張卡命中多筆時的其餘優惠（預設收合） -->
+<ng-template #moreOffers let-r let-dark="dark">
+  <div class="more" [class.dark]="dark">
+    <ul class="more-list">
+      @for (o of shown(r).slice(1); track o.merchant + o.category) {
+      <li>
+        <span class="m-merchant">{{ o.merchant }}</span>
+        <span class="m-cat">{{ o.category }}</span>
+        <span class="m-rate">{{ o.rate }}</span>
+      </li>
+      }
+    </ul>
+    @if (r.offers.length > FOLD_AT) {
+    <button type="button" class="linkish" (click)="toggleExpanded(r.card.id)">
+      {{ expanded().has(r.card.id) ? '收合' : '還有 ' + (r.offers.length - FOLD_AT) + ' 項，展開' }}
+    </button>
+    }
+  </div>
+</ng-template>

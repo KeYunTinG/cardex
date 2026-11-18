@@ -1,6 +1,6 @@
 import { Component, ElementRef, Injector, afterNextRender, inject, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CARD_SHORT, OfferGroup, QaAnswer, QaBlock, QaContext, ask, welcome } from './qa-engine';
+import { CARD_SHORT, OfferGroup, QaAnswer, QaBlock, QaContext, ask, capLabel, welcome } from './qa-engine';
 
 interface ChatMessage {
   id: number;
@@ -28,6 +28,7 @@ export class QaChat {
   readonly searchRequested = output<string>();
 
   protected readonly short = CARD_SHORT;
+  protected readonly capLabel = capLabel;
   protected readonly draft = signal('');
   protected readonly thinking = signal(false);
   protected readonly messages = signal<ChatMessage[]>([]);
@@ -41,7 +42,8 @@ export class QaChat {
     this.reset();
   }
 
-  protected send(text: string = this.draft()): void {
+  /** 送出問題；外部（首頁輸入框查不到時）也會直接呼叫 */
+  send(text: string = this.draft()): void {
     const q = text.trim();
     if (!q || this.thinking()) return;
     this.draft.set('');

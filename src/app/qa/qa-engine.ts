@@ -113,6 +113,11 @@ export function rateValue(rate: string): number | null {
   return m ? parseFloat(m[1]) : null;
 }
 
+/** 上限文字：原文已含「限」字（如「加碼上限 500 點／月」）就不再加「上限」前綴 */
+export function capLabel(cap: string): string {
+  return /限/.test(cap) ? cap : `上限 ${cap}`;
+}
+
 const isAscii = (s: string): boolean => /^[\x21-\x7e]+$/.test(s);
 const isAlnum = (c: string | undefined): boolean => !!c && /[a-z0-9]/.test(c);
 const uniq = <T>(xs: T[]): T[] => [...new Set(xs)];
